@@ -1,0 +1,8 @@
+namespace GroceryOrderingApp.Mobile.Resources.Styles
+{
+    public class AppStyles
+    {
+        // This file can be used for dynamic styling
+        // XAML-based styles are preferred for modern MAUI apps
+    }
+}

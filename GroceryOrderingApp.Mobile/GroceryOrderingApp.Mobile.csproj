@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.Maui.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0-android</TargetFrameworks>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+
+    <!-- Display name -->
+    <ApplicationTitle>Grocery Ordering</ApplicationTitle>
+
+    <!-- App Identifier -->
+    <ApplicationId>com.groceryordering.app</ApplicationId>
+
+    <!-- Versions -->
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationVersion>1</ApplicationVersion>
+
+    <!-- Android-specific options -->
+    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+
+    <!-- Display name for Android -->
+    <ApplicationId>com.groceryordering.app</ApplicationId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+    <PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <MauiXaml Update="Views\LoginPage.xaml" />
+    <MauiXaml Update="Views\CustomerCategoryPage.xaml" />
+    <MauiXaml Update="Views\CustomerProductPage.xaml" />
+    <MauiXaml Update="Views\CartPage.xaml" />
+    <MauiXaml Update="Views\CustomerOrderHistoryPage.xaml" />
+    <MauiXaml Update="Views\CustomerOrderDetailPage.xaml" />
+    <MauiXaml Update="Views\AdminDashboardPage.xaml" />
+    <MauiXaml Update="Views\AdminUsersPage.xaml" />
+    <MauiXaml Update="Views\AdminCategoriesPage.xaml" />
+    <MauiXaml Update="Views\AdminProductsPage.xaml" />
+    <MauiXaml Update="Views\AdminOrdersPage.xaml" />
+    <MauiXaml Update="Views\AdminOrderDetailPage.xaml" />
+  </ItemGroup>
+
+</Project>

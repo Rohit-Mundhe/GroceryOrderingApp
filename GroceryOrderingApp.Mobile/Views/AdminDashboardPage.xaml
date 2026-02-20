@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="GroceryOrderingApp.Mobile.Views.AdminDashboardPage"
+             Title="Admin Dashboard">
+    <VerticalStackLayout Padding="20" Spacing="15">
+        <Label Text="Admin Dashboard" FontSize="24" FontAttributes="Bold" HorizontalTextAlignment="Center"/>
+        
+        <Button Text="Manage Users" Padding="15" FontSize="16"/>
+        <Button Text="Manage Categories" Padding="15" FontSize="16"/>
+        <Button Text="Manage Products" Padding="15" FontSize="16"/>
+        <Button Text="View Orders" Padding="15" FontSize="16"/>
+        
+        <Button Text="Logout" Command="{Binding LogoutCommand}" Padding="15" FontSize="14" Margin="0,20,0,0"/>
+    </VerticalStackLayout>
+</ContentPage>
