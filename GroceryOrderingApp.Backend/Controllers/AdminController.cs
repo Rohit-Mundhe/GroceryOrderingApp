@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using GroceryOrderingApp.Backend.Repositories;
 using GroceryOrderingApp.Backend.Models;
 using GroceryOrderingApp.Backend.DTOs;
+using GroceryOrderingApp.Backend.Services;
 using Microsoft.AspNetCore.Identity;
 
 namespace GroceryOrderingApp.Backend.Controllers

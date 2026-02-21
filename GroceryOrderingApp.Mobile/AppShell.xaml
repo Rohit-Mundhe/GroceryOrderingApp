@@ -3,22 +3,42 @@
     x:Class="GroceryOrderingApp.Mobile.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:GroceryOrderingApp.Mobile.Views">
+    xmlns:local="clr-namespace:GroceryOrderingApp.Mobile.Views"
+    Shell.BackgroundColor="#1B5E20"
+    Shell.ForegroundColor="White"
+    Shell.TitleColor="White">
 
     <!-- Authentication Routes -->
     <ShellContent Title="Login" ContentTemplate="{DataTemplate local:LoginPage}" Route="login"/>
 
     <!-- Customer Routes -->
-    <TabBar x:Name="CustomerTabs" Route="customer" IsVisible="False">
-        <ShellContent Title="Categories" Icon="home" ContentTemplate="{DataTemplate local:CustomerCategoryPage}" Route="categories"/>
-        <ShellContent Title="Cart" Icon="cart" ContentTemplate="{DataTemplate local:CartPage}" Route="cart"/>
-        <ShellContent Title="Orders" Icon="history" ContentTemplate="{DataTemplate local:CustomerOrderHistoryPage}" Route="orderhistory"/>
+    <TabBar x:Name="CustomerTabs" Route="customer" IsVisible="False" Shell.BackgroundColor="#1B5E20">
+        <ShellContent Title="🏪 Categories" Icon="home" ContentTemplate="{DataTemplate local:CustomerCategoryPage}" Route="categories"/>
+        <ShellContent Title="🛒 Cart" Icon="cart" ContentTemplate="{DataTemplate local:CartPage}" Route="cart"/>
+        <ShellContent Title="📦 Orders" Icon="history" ContentTemplate="{DataTemplate local:CustomerOrderHistoryPage}" Route="orderhistory"/>
     </TabBar>
 
+    <!-- Customer Modal Routes -->
+    <Shell.Routes>
+        <Route Route="products/{categoryId}" ContentTemplate="{DataTemplate local:CustomerProductPage}"/>
+        <Route Route="orderdetail/{orderId}" ContentTemplate="{DataTemplate local:CustomerOrderDetailPage}"/>
+    </Shell.Routes>
+
     <!-- Admin Routes -->
-    <TabBar x:Name="AdminTabs" Route="admin" IsVisible="False">
-        <ShellContent Title="Dashboard" Icon="home" ContentTemplate="{DataTemplate local:AdminDashboardPage}" Route="dashboard"/>
-        <ShellContent Title="Orders" Icon="cart" ContentTemplate="{DataTemplate local:AdminOrdersPage}" Route="orders"/>
+    <TabBar x:Name="AdminTabs" Route="admin" IsVisible="False" Shell.BackgroundColor="#1B5E20">
+        <ShellContent Title="📊 Dashboard" Icon="home" ContentTemplate="{DataTemplate local:AdminDashboardPage}" Route="dashboard"/>
+        <ShellContent Title="🛍️ Products" Icon="cart" ContentTemplate="{DataTemplate local:AdminProductsPage}" Route="products"/>
+        <ShellContent Title="📋 Orders" Icon="menu" ContentTemplate="{DataTemplate local:AdminOrdersPage}" Route="orders"/>
+        <ShellContent Title="🏷️ Categories" Icon="folder" ContentTemplate="{DataTemplate local:AdminCategoriesPage}" Route="categories"/>
     </TabBar>
+
+    <!-- Admin Modal Routes -->
+    <Shell.Routes>
+        <Route Route="admin/dashboard" ContentTemplate="{DataTemplate local:AdminDashboardPage}"/>
+        <Route Route="admin/orders" ContentTemplate="{DataTemplate local:AdminOrdersPage}"/>
+        <Route Route="admin/products" ContentTemplate="{DataTemplate local:AdminProductsPage}"/>
+        <Route Route="admin/categories" ContentTemplate="{DataTemplate local:AdminCategoriesPage}"/>
+        <Route Route="admin/detail/{orderId}" ContentTemplate="{DataTemplate local:AdminOrderDetailPage}"/>
+    </Shell.Routes>
 
 </Shell>

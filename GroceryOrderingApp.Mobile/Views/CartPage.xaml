@@ -2,34 +2,165 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GroceryOrderingApp.Mobile.Views.CartPage"
-             Title="Cart">
-    <VerticalStackLayout Padding="10">
-        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"/>
+             Title="Shopping Cart"
+             BackgroundColor="{StaticResource BackgroundColor}">
+    
+    <Grid RowDefinitions="Auto,*,Auto" VerticalOptions="FillAndExpand">
         
-        <Label Text="{Binding CartItems.Count, StringFormat='Items in Cart: {0}'}" FontSize="14" FontAttributes="Bold"/>
+        <!-- Header -->
+        <StackLayout Grid.Row="0" BackgroundColor="{StaticResource Primary}" Padding="20" Spacing="0">
+            <Label Text="🛒 Your Cart" Style="{StaticResource HeadlineStyle}" 
+                   TextColor="White" HorizontalTextAlignment="Center"/>
+            <Label Text="{Binding CartItems.Count, StringFormat='Items: {0}'}" 
+                   FontSize="12" TextColor="{StaticResource TextSecondary}" 
+                   HorizontalTextAlignment="Center" Margin="0,8,0,0"/>
+        </StackLayout>
         
-        <CollectionView ItemsSource="{Binding CartItems}">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame Padding="15" Margin="5" HasShadow="True" CornerRadius="8">
-                        <StackLayout>
-                            <Label Text="{Binding ProductName}" FontSize="16" FontAttributes="Bold"/>
-                            <Label Text="{Binding Price, StringFormat='₹{0:F2}'}" FontSize="12" TextColor="Gray"/>
-                            <HorizontalStackLayout>
-                                <Label Text="Qty: " FontSize="12"/>
-                                <Label Text="{Binding Quantity}" FontSize="12"/>
-                                <Button Text="Update" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.UpdateQuantityCommand}" CommandParameter="{Binding .}" FontSize="10" Padding="5"/>
-                                <Button Text="Remove" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveItemCommand}" CommandParameter="{Binding .}" FontSize="10" Padding="5" TextColor="Red"/>
-                            </HorizontalStackLayout>
-                            <Label Text="{Binding TotalPrice, StringFormat='Total: ₹{0:F2}'}" FontSize="12" FontAttributes="Bold"/>
-                        </StackLayout>
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+        <!-- Loading Indicator -->
+        <ActivityIndicator Grid.Row="1" 
+                          IsRunning="{Binding IsLoading}" 
+                          IsVisible="{Binding IsLoading}"
+                          Color="{StaticResource Primary}"
+                          Scale="1.8"
+                          VerticalOptions="Center"/>
         
-        <Label Text="{Binding TotalAmount, StringFormat='Cart Total: ₹{0:F2}'}" FontSize="16" FontAttributes="Bold" Margin="0,20,0,0"/>
+        <!-- Cart Items or Empty Message -->
+        <ScrollView Grid.Row="1" 
+                   IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                   VerticalOptions="FillAndExpand">
+            <VerticalStackLayout Padding="12" Spacing="12">
+                
+                <!-- Empty Cart Message -->
+                <StackLayout Padding="20" VerticalOptions="Center" 
+                           IsVisible="{Binding CartItems.Count, Converter={StaticResource CountToInvertedBoolConverter}}"
+                           Spacing="12">
+                    <Label Text="🛍️" FontSize="48" HorizontalTextAlignment="Center"/>
+                    <Label Text="Your cart is empty" 
+                           Style="{StaticResource SubheadStyle}"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{StaticResource TextPrimary}"/>
+                    <Label Text="Browse categories and add products to get started"
+                           FontSize="12"
+                           TextColor="{StaticResource TextHint}"
+                           HorizontalTextAlignment="Center"
+                           LineBreakMode="WordWrap"/>
+                </StackLayout>
+                
+                <!-- Cart Items List -->
+                <StackLayout Spacing="12" IsVisible="{Binding CartItems.Count, Converter={StaticResource CountToBool}}">
+                    <CollectionView ItemsSource="{Binding CartItems}" SelectionMode="None">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Style="{StaticResource CardStyle}" 
+                                       HasShadow="True"
+                                       BorderColor="{StaticResource Secondary}"
+                                       Padding="12">
+                                    <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8" ColumnSpacing="12">
+                                        
+                                        <!-- Item Details -->
+                                        <StackLayout Grid.Row="0" Grid.Column="0" Spacing="4">
+                                            <Label Text="{Binding ProductName}" 
+                                                  Fontsize="14" 
+                                                  FontAttributes="Bold"
+                                                  TextColor="{StaticResource TextPrimary}"/>
+                                            <Label Text="{Binding Price, StringFormat='₹{0:F2} each'}" 
+                                                  FontSize="12"
+                                                  TextColor="{StaticResource Success}"/>
+                                        </StackLayout>
+                                        
+                                        <!-- Item Total -->
+                                        <Label Grid.Row="0" Grid.Column="1"
+                                              Text="{Binding TotalPrice, StringFormat='₹{0:F2}'}"
+                                              FontSize="14"
+                                              FontAttributes="Bold"
+                                              TextColor="{StaticResource Primary}"
+                                              HorizontalTextAlignment="End"
+                                              VerticalTextAlignment="Start"/>
+                                        
+                                        <!-- Quantity & Actions -->
+                                        <Grid Grid.Row="1" Grid.ColumnSpan="2"
+                                             ColumnDefinitions="Auto,Auto,Auto,*"
+                                             ColumnSpacing="8"
+                                             VerticalOptions="Center">
+                                            <Label Grid.Column="0" Text="Qty:" FontSize="12" VerticalTextAlignment="Center"/>
+                                            <Label Grid.Column="1" Text="{Binding Quantity}" FontSize="13" FontAttributes="Bold"
+                                                  VerticalTextAlignment="Center" MinimumWidthRequest="20"/>
+                                            
+                                            <Button Grid.Column="2"
+                                                   Text="✎"
+                                                   FontSize="14"
+                                                   BackgroundColor="{StaticResource Secondary}"
+                                                   TextColor="White"
+                                                   Padding="4"
+                                                   WidthRequest="36"
+                                                   HeightRequest="36"
+                                                   CornerRadius="18"
+                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.UpdateQuantityCommand}"
+                                                   CommandParameter="{Binding .}"/>
+                                            
+                                            <Button Grid.Column="3"
+                                                   Text="🗑 Remove"
+                                                   FontSize="11"
+                                                   Style="{StaticResource DangerButtonStyle}"
+                                                   HorizontalOptions="End"
+                                                   Padding="8"
+                                                   Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveItemCommand}"
+                                                   CommandParameter="{Binding .}"/>
+                                        </Grid>
+                                    </Grid>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
+                
+            </VerticalStackLayout>
+        </ScrollView>
         
-        <Button Text="Place Order" Command="{Binding PlaceOrderCommand}" Margin="0,10,0,0" Padding="10" IsEnabled="{Binding CartItems.Count, Converter={StaticResource CountToBool}}"/>
-    </VerticalStackLayout>
+        <!-- Error Message -->
+        <Label Grid.Row="1"
+               Text="{Binding ErrorMessage}"
+               TextColor="{StaticResource Error}"
+               FontSize="14"
+               LineBreakMode="WordWrap"
+               Padding="20"
+               HorizontalTextAlignment="Center"
+               VerticalOptions="Center"
+               IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBool}}"/>
+        
+        <!-- Checkout Section -->
+        <Frame Grid.Row="2"
+               BorderColor="{StaticResource PrimaryDark}"
+               HasShadow="True"
+               Padding="12"
+               CornerRadius="12"
+               Margin="12,0,12,12"
+               IsVisible="{Binding CartItems.Count, Converter={StaticResource CountToBool}}">
+            <VerticalStackLayout Spacing="8">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <Label Grid.Column="0"
+                          Text="Cart Total:"
+                          FontSize="14"
+                          FontAttributes="Bold"
+                          TextColor="{StaticResource TextPrimary}"
+                          VerticalOptions="Center"/>
+                    <Label Grid.Column="1"
+                          Text="{Binding TotalAmount, StringFormat='₹{0:F2}'}"
+                          FontSize="16"
+                          FontAttributes="Bold"
+                          TextColor="{StaticResource Primary}"/>
+                </Grid>
+                
+                <Button Text="🛒 Place Order"
+                       Style="{StaticResource PrimaryButtonStyle}"
+                       FontSize="14"
+                       Padding="12"
+                       Command="{Binding PlaceOrderCommand}"
+                       IsEnabled="{Binding CartItems.Count, Converter={StaticResource CountToBool}}"
+                       Opacity="{Binding CartItems.Count, Converter={StaticResource CountToBool}, ConverterParameter='1.0|0.5'}"/>
+            </VerticalStackLayout>
+        </Frame>
+        
+    </Grid>
+    
 </ContentPage>

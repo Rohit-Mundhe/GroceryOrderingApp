@@ -7,6 +7,7 @@ namespace GroceryOrderingApp.Mobile.ViewModels
     {
         private List<CartItem> _cartItems = new();
         private decimal _totalAmount;
+        private string _errorMessage = string.Empty;
         private readonly ICartService _cartService;
 
         public List<CartItem> CartItems
@@ -19,6 +20,12 @@ namespace GroceryOrderingApp.Mobile.ViewModels
         {
             get => _totalAmount;
             set => SetProperty(ref _totalAmount, value);
+        }
+
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set => SetProperty(ref _errorMessage, value);
         }
 
         public ICommand RemoveItemCommand { get; }
@@ -43,53 +50,120 @@ namespace GroceryOrderingApp.Mobile.ViewModels
 
         private void RemoveItem(CartItem item)
         {
+            var toastService = ServiceHelper.GetService<IToastService>();
             _cartService.RemoveFromCart(item.ProductId);
             Refresh();
+            
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                await toastService.ShowInfo($"{item.ProductName} removed from cart");
+            });
         }
 
         private async void UpdateQuantity(CartItem item)
         {
-            var result = await Application.Current!.MainPage!.DisplayPromptAsync("Update Quantity", $"Enter new quantity:", "Update", "Cancel", placeholder: item.Quantity.ToString(), keyboard: Keyboard.Numeric);
-            if (!string.IsNullOrEmpty(result) && int.TryParse(result, out int newQuantity))
+            try
             {
-                if (newQuantity <= 0)
+                var result = await Application.Current!.MainPage!.DisplayPromptAsync(
+                    "Update Quantity", 
+                    $"New quantity for {item.ProductName}:", 
+                    "Update", "Cancel", 
+                    placeholder: item.Quantity.ToString(), 
+                    keyboard: Keyboard.Numeric);
+                    
+                if (string.IsNullOrEmpty(result))
+                    return;
+                    
+                var toastService = ServiceHelper.GetService<IToastService>();
+                
+                if (!int.TryParse(result, out int newQuantity) || newQuantity < 0)
+                {
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        await toastService.ShowError("Please enter a valid quantity");
+                    });
+                    return;
+                }
+                
+                if (newQuantity == 0)
+                {
                     _cartService.RemoveFromCart(item.ProductId);
-                else
+                    Refresh();
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        await toastService.ShowInfo("Item removed from cart");
+                    });
+                }
+                else if (newQuantity != item.Quantity)
+                {
                     _cartService.UpdateCartQuantity(item.ProductId, newQuantity);
-                Refresh();
+                    Refresh();
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        await toastService.ShowSuccess("Quantity updated");
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    var toastService = ServiceHelper.GetService<IToastService>();
+                    await toastService.ShowError($"Error: {ex.Message}");
+                });
             }
         }
 
         private async Task PlaceOrderAsync()
         {
+            var toastService = ServiceHelper.GetService<IToastService>();
+            
             if (CartItems.Count == 0)
             {
-                await Application.Current!.MainPage!.DisplayAlert("Error", "Cart is empty", "OK");
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    await toastService.ShowError("Your cart is empty");
+                });
                 return;
             }
 
             IsLoading = true;
+            ErrorMessage = string.Empty;
+            
             try
             {
                 var orderItems = CartItems.Select(c => new { productId = c.ProductId, quantity = c.Quantity }).ToList();
                 var orderRequest = new { items = orderItems };
 
-                var response = await _apiService.PostAsync<OrderDto>("api/orders", orderRequest);
-                if (response != null)
+                var response = await _apiService.PostAsync<OrderDto>("orders", orderRequest);
+                
+                if (response.IsSuccess && response.Data != null)
                 {
                     _cartService.ClearCart();
                     Refresh();
-                    await Application.Current!.MainPage!.DisplayAlert("Success", "Order placed successfully", "OK");
-                    await Shell.Current.GoToAsync("customer/orderhistory");
+                    
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        await toastService.ShowSuccess("Order placed successfully! ✓");
+                        await Shell.Current.GoToAsync("customer/orderhistory");
+                    });
                 }
                 else
                 {
-                    await Application.Current!.MainPage!.DisplayAlert("Error", "Failed to place order", "OK");
+                    ErrorMessage = response.ErrorMessage ?? "Failed to place order";
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        await toastService.ShowError(ErrorMessage);
+                    });
                 }
             }
             catch (Exception ex)
             {
-                await Application.Current!.MainPage!.DisplayAlert("Error", $"Order failed: {ex.Message}", "OK");
+                ErrorMessage = $"Error: {ex.Message}";
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    await toastService.ShowError(ErrorMessage);
+                });
             }
             finally
             {

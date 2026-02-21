@@ -1,15 +1,23 @@
 using GroceryOrderingApp.Mobile.Models;
+using GroceryOrderingApp.Mobile.Services;
 
 namespace GroceryOrderingApp.Mobile.ViewModels
 {
     public class AdminOrderDetailViewModel : BaseViewModel
     {
         private OrderDto? _order;
+        private string _errorMessage = string.Empty;
 
         public OrderDto? Order
         {
             get => _order;
             set => SetProperty(ref _order, value);
+        }
+
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set => SetProperty(ref _errorMessage, value);
         }
 
         public ICommand LoadOrderCommand { get; }
@@ -19,21 +27,41 @@ namespace GroceryOrderingApp.Mobile.ViewModels
         public AdminOrderDetailViewModel()
         {
             LoadOrderCommand = new Command<int>(async (id) => await LoadOrderAsync(id));
-            DeliverOrderCommand = new Command(async () => await DeliverOrderAsync());
-            CancelOrderCommand = new Command(async () => await CancelOrderAsync());
+            DeliverOrderCommand = new Command(async () => await UpdateOrderStatusAsync("Delivered"));
+            CancelOrderCommand = new Command(async () => await UpdateOrderStatusAsync("Cancelled"));
         }
 
         private async Task LoadOrderAsync(int orderId)
         {
             IsLoading = true;
+            ErrorMessage = string.Empty;
+
             try
             {
-                var order = await _apiService.GetAsync<OrderDto>($"api/admin/orders/{orderId}");
-                Order = order;
+                var response = await _apiService.GetAsync<OrderDto>($"orders/{orderId}");
+                
+                if (response.IsSuccess && response.Data != null)
+                {
+                    Order = response.Data;
+                }
+                else
+                {
+                    ErrorMessage = response.ErrorMessage ?? "Failed to load order";
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        var toastService = ServiceHelper.GetService<IToastService>();
+                        await toastService.ShowError(ErrorMessage);
+                    });
+                }
             }
             catch (Exception ex)
             {
-                await Application.Current!.MainPage!.DisplayAlert("Error", $"Failed to load order: {ex.Message}", "OK");
+                ErrorMessage = $"Error: {ex.Message}";
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    var toastService = ServiceHelper.GetService<IToastService>();
+                    await toastService.ShowError(ErrorMessage);
+                });
             }
             finally
             {
@@ -41,55 +69,61 @@ namespace GroceryOrderingApp.Mobile.ViewModels
             }
         }
 
-        private async Task DeliverOrderAsync()
+        private async Task UpdateOrderStatusAsync(string newStatus)
         {
-            if (Order == null || Order.Status != "Pending")
+            var toastService = ServiceHelper.GetService<IToastService>();
+
+            if (Order == null)
             {
-                await Application.Current!.MainPage!.DisplayAlert("Error", "Can only deliver pending orders", "OK");
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    await toastService.ShowError("No order loaded");
+                });
                 return;
             }
 
+            // Confirm action
+            var confirm = await Application.Current!.MainPage!.DisplayAlert(
+                "Confirm", 
+                $"Mark order as {newStatus}?", 
+                "Yes", 
+                "No");
+
+            if (!confirm)
+                return;
+
             IsLoading = true;
+            ErrorMessage = string.Empty;
+
             try
             {
-                var result = await _apiService.PutAsync<object>($"api/admin/orders/{Order.Id}/deliver");
-                if (result != null)
+                var updateRequest = new { status = newStatus };
+                var response = await _apiService.PutAsync<OrderDto>($"orders/{Order.Id}/status", updateRequest);
+
+                if (response.IsSuccess && response.Data != null)
                 {
-                    await Application.Current!.MainPage!.DisplayAlert("Success", "Order delivered", "OK");
-                    Order!.Status = "Delivered";
+                    Order = response.Data;
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        await toastService.ShowSuccess($"Order marked as {newStatus} ✓");
+                    });
+                }
+                else
+                {
+                    ErrorMessage = response.ErrorMessage ?? $"Failed to update order";
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        await toastService.ShowError(ErrorMessage);
+                    });
                 }
             }
             catch (Exception ex)
             {
-                await Application.Current!.MainPage!.DisplayAlert("Error", $"Failed: {ex.Message}", "OK");
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }
-
-        private async Task CancelOrderAsync()
-        {
-            if (Order == null || Order.Status != "Pending")
-            {
-                await Application.Current!.MainPage!.DisplayAlert("Error", "Can only cancel pending orders", "OK");
-                return;
-            }
-
-            IsLoading = true;
-            try
-            {
-                var result = await _apiService.PutAsync<object>($"api/admin/orders/{Order.Id}/cancel");
-                if (result != null)
+                ErrorMessage = $"Error: {ex.Message}";
+                MainThread.BeginInvokeOnMainThread(async () =>
                 {
-                    await Application.Current!.MainPage!.DisplayAlert("Success", "Order cancelled", "OK");
-                    Order!.Status = "Cancelled";
-                }
-            }
-            catch (Exception ex)
-            {
-                await Application.Current!.MainPage!.DisplayAlert("Error", $"Failed: {ex.Message}", "OK");
+                    await toastService.ShowError(ErrorMessage);
+                });
             }
             finally
             {

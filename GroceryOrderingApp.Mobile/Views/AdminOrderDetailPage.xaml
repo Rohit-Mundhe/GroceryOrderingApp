@@ -2,31 +2,118 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GroceryOrderingApp.Mobile.Views.AdminOrderDetailPage"
-             Title="Order Details">
-    <VerticalStackLayout Padding="15" Spacing="10">
-        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"/>
+             Title="Order Details"
+             BackgroundColor="{StaticResource BackgroundColor}">
+    
+    <Grid RowDefinitions="Auto,*,Auto" VerticalOptions="FillAndExpand">
         
-        <Label Text="{Binding Order.Id, StringFormat='Order #{0}'}" FontSize="18" FontAttributes="Bold"/>
-        <Label Text="{Binding Order.OrderDate, StringFormat='Date: {0:g}'}" FontSize="12" TextColor="Gray"/>
-        <Label Text="{Binding Order.Status, StringFormat='Status: {0}'}" FontSize="14" FontAttributes="Bold"/>
-        <Label Text="{Binding Order.TotalAmount, StringFormat='Total: ₹{0:F2}'}" FontSize="14" TextColor="Green" FontAttributes="Bold"/>
+        <!-- Header -->
+        <StackLayout Grid.Row="0" BackgroundColor="{StaticResource Primary}" Padding="20" Spacing="0">
+            <Label Text="{Binding Order.Id, StringFormat='Order #{0:D4}'}" 
+                   Style="{StaticResource HeadlineStyle}"
+                   TextColor="White" HorizontalTextAlignment="Center"/>
+            <Label Text="{Binding Order.OrderDate, StringFormat='Placed on {0:MMM dd, yyyy}'}" 
+                   FontSize="12" TextColor="{StaticResource TextSecondary}" 
+                   HorizontalTextAlignment="Center" Margin="0,8,0,0"/>
+        </StackLayout>
         
-        <Label Text="Items:" FontSize="14" FontAttributes="Bold" Margin="0,10,0,0"/>
-        <CollectionView ItemsSource="{Binding Order.Items}">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Frame Padding="10" Margin="5" HasShadow="True">
-                        <StackLayout>
-                            <Label Text="{Binding ProductName}" FontSize="12" FontAttributes="Bold"/>
-                            <Label Text="{Binding Quantity, StringFormat='Qty: {0}'}" FontSize="11"/>
-                            <Label Text="{Binding PriceAtTime, StringFormat='Price: ₹{0:F2}'}" FontSize="11"/>
-                        </StackLayout>
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+        <!-- Loading & Content -->
+        <ActivityIndicator Grid.Row="1" 
+                          IsRunning="{Binding IsLoading}" 
+                          IsVisible="{Binding IsLoading}"
+                          Color="{StaticResource Primary}"
+                          Scale="1.8"
+                          VerticalOptions="Center"/>
         
-        <Button Text="Mark as Delivered" Command="{Binding DeliverOrderCommand}" Margin="0,10,0,0" Padding="10" IsEnabled="{Binding Order.Status, Converter={StaticResource IsPending}}"/>
-        <Button Text="Cancel Order" Command="{Binding CancelOrderCommand}" Padding="10" TextColor="Red" IsEnabled="{Binding Order.Status, Converter={StaticResource IsPending}}"/>
-    </VerticalStackLayout>
+        <ScrollView Grid.Row="1"
+                   IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
+                   VerticalOptions="FillAndExpand">
+            <VerticalStackLayout Padding="16" Spacing="16">
+                
+                <!-- Order Summary Card -->
+                <Frame Style="{StaticResource CardStyle}" HasShadow="True" BorderColor="{StaticResource Primary}">
+                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8" ColumnSpacing="12">
+                        <Label Grid.Row="0" Grid.Column="0" Text="Customer ID" FontAttributes="Bold" TextColor="{StaticResource TextSecondary}"/>
+                        <Label Grid.Row="0" Grid.Column="1" Text="{Binding Order.UserId}" FontAttributes="Bold"/>
+                        
+                        <Label Grid.Row="1" Grid.Column="0" Text="Status" FontAttributes="Bold" TextColor="{StaticResource TextSecondary}"/>
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding Order.Status}" 
+                              TextColor="{Binding Order.Status, Converter={StaticResource StatusColorConverter}}"
+                              FontAttributes="Bold"/>
+                        
+                        <Label Grid.Row="2" Grid.Column="0" Text="Total Amount" FontAttributes="Bold" TextColor="{StaticResource TextSecondary}"/>
+                        <Label Grid.Row="2" Grid.Column="1" Text="{Binding Order.TotalAmount, StringFormat='₹{0:F2}'}" 
+                              TextColor="{StaticResource Success}" FontAttributes="Bold" FontSize="16"/>
+                    </Grid>
+                </Frame>
+                
+                <!-- Order Items -->
+                <Label Text="Order Items" FontSize="14" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}"/>
+                
+                <CollectionView ItemsSource="{Binding Order.Items}" SelectionMode="None">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Style="{StaticResource CardStyle}" 
+                                  Margin="0,6"
+                                  HasShadow="True"
+                                  Padding="12">
+                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="4" ColumnSpacing="12">
+                                    <Label Grid.Row="0" Grid.Column="0"
+                                          Text="{Binding ProductName}"
+                                          FontSize="13" FontAttributes="Bold"
+                                          TextColor="{StaticResource TextPrimary}"/>
+                                    <Label Grid.Row="0" Grid.Column="1"
+                                          Text="{Binding Quantity, StringFormat='Qty: {0}'}"
+                                          FontSize="12" TextColor="{StaticResource TextSecondary}"/>
+                                    
+                                    <Label Grid.Row="1" Grid.Column="0"
+                                          Text="{Binding PriceAtTime, StringFormat='₹{0:F2} each'}"
+                                          FontSize="12" TextColor="{StaticResource Success}"/>
+                                    <Label Grid.Row="1" Grid.Column="1"
+                                          Text="{Binding Quantity, StringFormat='Total: ₹{0}'}"
+                                          FontSize="12" FontAttributes="Bold"
+                                          TextColor="{StaticResource Primary}"/>
+                                </Grid>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+        
+        <!-- Error Message -->
+        <Label Grid.Row="1"
+               Text="{Binding ErrorMessage}"
+               TextColor="{StaticResource Error}"
+               FontSize="14"
+               LineBreakMode="WordWrap"
+               Padding="20"
+               HorizontalTextAlignment="Center"
+               VerticalOptions="Center"
+               IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBool}}"/>
+        
+        <!-- Action Buttons -->
+        <Frame Grid.Row="2"
+               Style="{StaticResource CardStyle}"
+               HasShadow="True"
+               Padding="12"
+               Margin="12,0,12,12">
+            <StackLayout Spacing="8">
+                <Button Text="✓ Mark as Delivered"
+                       Style="{StaticResource PrimaryButtonStyle}"
+                       FontSize="13"
+                       Padding="10"
+                       Command="{Binding DeliverOrderCommand}"
+                       IsEnabled="{Binding Order.Status, Converter={StaticResource IsPending}}"/>
+                
+                <Button Text="✕ Mark as Cancelled"
+                       Style="{StaticResource DangerButtonStyle}"
+                       FontSize="13"
+                       Padding="10"
+                       Command="{Binding CancelOrderCommand}"
+                       IsEnabled="{Binding Order.Status, Converter={StaticResource IsPending}}"/>
+            </StackLayout>
+        </Frame>
+    </Grid>
+    
 </ContentPage>

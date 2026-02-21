@@ -2,12 +2,126 @@
 <Application
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:GroceryOrderingApp.Mobile.Converters"
     x:Class="GroceryOrderingApp.Mobile.App">
     <Application.Resources>
         <ResourceDictionary>
-            <Color x:Key="PageBackgroundColor">White</Color>
-            <Color x:Key="PrimaryColor">#512BD4</Color>
-            <Color x:Key="SecondaryColor">#DFD8F7</Color>
+            <!-- Value Converters -->
+            <local:StringToBoolConverter x:Key="StringToBool"/>
+            <local:CountToBoolConverter x:Key="CountToBool"/>
+            <local:CountToInvertedBoolConverter x:Key="CountToInvertedBoolConverter"/>
+            <local:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+            <local:InverseBoolConverter x:Key="InverseBool"/>
+            <local:IsPendingConverter x:Key="IsPending"/>
+            <local:StatusColorConverter x:Key="StatusColorConverter"/>
+            
+            <!-- Modern Material Design 3 Colors -->
+            <Color x:Key="PrimaryColor">#2E7D32</Color>
+            <Color x:Key="PrimaryLight">#66BB6A</Color>
+            <Color x:Key="PrimaryDark">#1B5E20</Color>
+            
+            <Color x:Key="SecondaryColor">#FF9800</Color>
+            <Color x:Key="SecondaryLight">#FFB74D</Color>
+            <Color x:Key="SecondaryDark">#E65100</Color>
+            
+            <Color x:Key="BackgroundColor">#F5F5F5</Color>
+            <Color x:Key="SurfaceColor">#FFFFFF</Color>
+            <Color x:Key="PageBackgroundColor">#F5F5F5</Color>
+            
+            <Color x:Key="TextPrimaryColor">#212121</Color>
+            <Color x:Key="TextSecondaryColor">#757575</Color>
+            <Color x:Key="TextHintColor">#BDBDBD</Color>
+            
+            <Color x:Key="SuccessColor">#4CAF50</Color>
+            <Color x:Key="WarningColor">#FFC107</Color>
+            <Color x:Key="ErrorColor">#F44336</Color>
+            <Color x:Key="InfoColor">#2196F3</Color>
+            
+            <!-- Elevation & Shadow -->
+            <Color x:Key="ShadowColor">#000000</Color>
+            
+            <!-- Aliases for Resources (shorter names) -->
+            <StaticResource x:Key="Primary" ResourceKey="PrimaryColor"/>
+            <StaticResource x:Key="Secondary" ResourceKey="SecondaryColor"/>
+            <StaticResource x:Key="Success" ResourceKey="SuccessColor"/>
+            <StaticResource x:Key="Error" ResourceKey="ErrorColor"/>
+            <StaticResource x:Key="TextPrimary" ResourceKey="TextPrimaryColor"/>
+            <StaticResource x:Key="TextSecondary" ResourceKey="TextSecondaryColor"/>
+            <StaticResource x:Key="TextHint" ResourceKey="TextHintColor"/>
+
+            
+            <!-- Typography -->
+            <Style x:Key="HeadlineStyle" TargetType="Label">
+                <Setter Property="FontSize" Value="28"/>
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="TextColor" Value="{StaticResource TextPrimaryColor}"/>
+            </Style>
+            
+            <Style x:Key="SubheadStyle" TargetType="Label">
+                <Setter Property="FontSize" Value="20"/>
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="TextColor" Value="{StaticResource TextPrimaryColor}"/>
+            </Style>
+            
+            <Style x:Key="BodyStyle" TargetType="Label">
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="TextColor" Value="{StaticResource TextPrimaryColor}"/>
+            </Style>
+            
+            <Style x:Key="CaptionStyle" TargetType="Label">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="TextColor" Value="{StaticResource TextSecondaryColor}"/>
+            </Style>
+            
+            <!-- Button Styles -->
+            <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="{StaticResource PrimaryColor}"/>
+                <Setter Property="TextColor" Value="White"/>
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="15,12"/>
+                <Setter Property="BorderWidth" Value="0"/>
+            </Style>
+            
+            <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="Transparent"/>
+                <Setter Property="TextColor" Value="{StaticResource PrimaryColor}"/>
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="15,12"/>
+                <Setter Property="BorderColor" Value="{StaticResource PrimaryColor}"/>
+                <Setter Property="BorderWidth" Value="2"/>
+            </Style>
+            
+            <Style x:Key="DangerButtonStyle" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="{StaticResource ErrorColor}"/>
+                <Setter Property="TextColor" Value="White"/>
+                <Setter Property="FontAttributes" Value="Bold"/>
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="15,12"/>
+                <Setter Property="BorderWidth" Value="0"/>
+            </Style>
+            
+            <!-- Card Style -->
+            <Style x:Key="CardStyle" TargetType="Frame">
+                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceColor}"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="HasShadow" Value="True"/>
+                <Setter Property="BorderColor" Value="Transparent"/>
+                <Setter Property="Padding" Value="16"/>
+            </Style>
+            
+            <!-- Entry/Input Styles -->
+            <Style x:Key="InputStyle" TargetType="Entry">
+                <Setter Property="FontSize" Value="16"/>
+                <Setter Property="TextColor" Value="{StaticResource TextPrimaryColor}"/>
+                <Setter Property="PlaceholderColor" Value="{StaticResource TextHintColor}"/>
+                <Setter Property="BackgroundColor" Value="#F0F0F0"/>
+                <Setter Property="Padding" Value="12"/>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

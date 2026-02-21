@@ -2,8 +2,8 @@ namespace GroceryOrderingApp.Mobile;
 
 public static class AppConfig
 {
-    // Update this with your actual API endpoint
-    public const string ApiBaseUrl = "https://localhost:7001";
+    // Railway Production API
+    public const string ApiBaseUrl = "https://groceryappapi-production.up.railway.app/api";
     
     // Storage keys
     public const string TokenKey = "token";

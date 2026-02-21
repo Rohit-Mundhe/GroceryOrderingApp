@@ -2,25 +2,100 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GroceryOrderingApp.Mobile.Views.AdminOrdersPage"
-             Title="Orders">
-    <VerticalStackLayout Padding="10">
-        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"/>
+             Title="Manage Orders"
+             BackgroundColor="{StaticResource BackgroundColor}">
+    
+    <Grid RowDefinitions="Auto,*,Auto" VerticalOptions="FillAndExpand">
         
-        <CollectionView ItemsSource="{Binding Orders}">
+        <!-- Header -->
+        <StackLayout Grid.Row="0" BackgroundColor="{StaticResource Primary}" Padding="20" Spacing="0">
+            <Label Text="📋 All Orders" Style="{StaticResource HeadlineStyle}" 
+                   TextColor="White" HorizontalTextAlignment="Center"/>
+            <Label Text="Manage pending and completed orders" 
+                   FontSize="12" TextColor="{StaticResource TextSecondary}" 
+                   HorizontalTextAlignment="Center" Margin="0,8,0,0"/>
+        </StackLayout>
+        
+        <!-- Loading Indicator -->
+        <ActivityIndicator Grid.Row="1" 
+                          IsRunning="{Binding IsLoading}" 
+                          IsVisible="{Binding IsLoading}"
+                          Color="{StaticResource Primary}"
+                          Scale="1.8"
+                          VerticalOptions="Center"/>
+        
+        <!-- Orders List -->
+        <CollectionView Grid.Row="1" 
+                       ItemsSource="{Binding Orders}"
+                       Padding="12"
+                       VerticalOptions="FillAndExpand"
+                       IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Frame Padding="15" Margin="5" HasShadow="True" CornerRadius="8">
-                        <StackLayout>
-                            <Label Text="{Binding Id, StringFormat='Order #{0}'}" FontSize="16" FontAttributes="Bold"/>
-                            <Label Text="{Binding UserId, StringFormat='User ID: {0}'}" FontSize="12" TextColor="Gray"/>
-                            <Label Text="{Binding OrderDate, StringFormat='Date: {0:g}'}" FontSize="12" TextColor="Gray"/>
-                            <Label Text="{Binding Status, StringFormat='Status: {0}'}" FontSize="12" FontAttributes="Bold"/>
-                            <Label Text="{Binding TotalAmount, StringFormat='Total: ₹{0:F2}'}" FontSize="12" TextColor="Green"/>
-                            <Button Text="View Details" CommandParameter="{Binding Id}" Padding="10"/>
-                        </StackLayout>
+                    <Frame Style="{StaticResource CardStyle}" 
+                           HasShadow="True"
+                           Padding="12"
+                           Margin="0,6"
+                           BorderColor="{Binding Status, Converter={StaticResource StatusColorConverter}}">
+                        
+                        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8" ColumnSpacing="12">
+                            
+                            <!-- Order ID & Date -->
+                            <Label Grid.Row="0" Grid.Column="0"
+                                  Text="{Binding Id, StringFormat='Order #{0:D4}'}"
+                                  FontSize="14" FontAttributes="Bold"
+                                  TextColor="{StaticResource TextPrimary}"/>
+                            <Label Grid.Row="0" Grid.Column="1"
+                                  Text="{Binding OrderDate, StringFormat='{0:MMM dd}'}"
+                                  FontSize="12" TextColor="{StaticResource TextHint}"/>
+                            
+                            <!-- User & Amount -->
+                            <Label Grid.Row="1" Grid.Column="0"
+                                  Text="{Binding UserId, StringFormat='User ID: {0}'}"
+                                  FontSize="12" TextColor="{StaticResource TextSecondary}"/>
+                            <Label Grid.Row="1" Grid.Column="1"
+                                  Text="{Binding TotalAmount, StringFormat='₹{0:F2}'}"
+                                  FontSize="13" FontAttributes="Bold"
+                                  TextColor="{StaticResource Success}"/>
+                            
+                            <!-- Status & Action Button -->
+                            <Label Grid.Row="2" Grid.Column="0"
+                                  Text="{Binding Status}"
+                                  FontSize="11" FontAttributes="Bold"
+                                  TextColor="{Binding Status, Converter={StaticResource StatusColorConverter}}"
+                                  Padding="6,3" BackgroundColor="{StaticResource BackgroundColor}"/>
+                            
+                            <Button Grid.Row="2" Grid.Column="1"
+                                   Text="👁 View"
+                                   FontSize="11"
+                                   Style="{StaticResource SecondaryButtonStyle}"
+                                   Padding="8"
+                                   Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.SelectOrderCommand}"
+                                   CommandParameter="{Binding Id}"/>
+                        </Grid>
                     </Frame>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-    </VerticalStackLayout>
+        
+        <!-- Error Message -->
+        <Label Grid.Row="1"
+               Text="{Binding ErrorMessage}"
+               TextColor="{StaticResource Error}"
+               FontSize="14"
+               LineBreakMode="WordWrap"
+               Padding="20"
+               HorizontalTextAlignment="Center"
+               VerticalOptions="Center"
+               IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBool}}"/>
+        
+        <!-- Footer -->
+        <Label Grid.Row="2"
+               Text="Tap 'View' to manage order status"
+               FontSize="11"
+               TextColor="{StaticResource TextHint}"
+               HorizontalTextAlignment="Center"
+               Margin="0,12,0,12"/>
+    </Grid>
+    
 </ContentPage>

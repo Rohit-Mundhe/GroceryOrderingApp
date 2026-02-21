@@ -15,5 +15,9 @@ public partial class CartPage : ContentPage
         base.OnAppearing();
         var vm = (CartViewModel)BindingContext;
         vm.Refresh();
+        
+        // Fade-in animation for content
+        this.Opacity = 0;
+        this.FadeTo(1, 400, Easing.CubicOut);
     }
 }

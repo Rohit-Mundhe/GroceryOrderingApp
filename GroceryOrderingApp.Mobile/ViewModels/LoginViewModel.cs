@@ -1,4 +1,5 @@
 using GroceryOrderingApp.Mobile.Models;
+using GroceryOrderingApp.Mobile.Services;
 
 namespace GroceryOrderingApp.Mobile.ViewModels
 {
@@ -35,9 +36,15 @@ namespace GroceryOrderingApp.Mobile.ViewModels
 
         private async Task LoginAsync()
         {
-            if (string.IsNullOrWhiteSpace(UserId) || string.IsNullOrWhiteSpace(Password))
+            if (string.IsNullOrWhiteSpace(UserId))
             {
-                ErrorMessage = "UserId and Password are required";
+                ErrorMessage = "UserId is required";
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(Password))
+            {
+                ErrorMessage = "Password is required";
                 return;
             }
 
@@ -46,33 +53,53 @@ namespace GroceryOrderingApp.Mobile.ViewModels
 
             try
             {
-                var response = await _apiService.PostAsync<LoginResponse>("api/auth/login", new LoginRequest
+                var apiResponse = await _apiService.PostAsync<LoginResponse>("auth/login", new LoginRequest
                 {
                     UserId = UserId,
                     Password = Password
                 });
 
-                if (response != null)
+                if (apiResponse.IsSuccess && apiResponse.Data != null)
                 {
-                    await _storageService.SetAsync("token", response.Token);
-                    await _storageService.SetAsync("role", response.Role);
-                    await _storageService.SetAsync("userId", response.UserId.ToString());
-                    _apiService.SetAuthToken(response.Token);
+                    var loginData = apiResponse.Data;
+                    await _storageService.SetAsync("token", loginData.Token);
+                    await _storageService.SetAsync("role", loginData.Role);
+                    await _storageService.SetAsync("userId", loginData.UserId.ToString());
+                    _apiService.SetAuthToken(loginData.Token);
+
+                    // Toast notification
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        var toastService = ServiceHelper.GetService<IToastService>();
+                        await toastService.ShowSuccess($"Welcome, {loginData.Role}!");
+                    });
 
                     // Navigate based on role
-                    if (response.Role == "Admin")
-                        Shell.Current.GoToAsync("admin");
+                    if (loginData.Role?.Equals("Admin", StringComparison.OrdinalIgnoreCase) == true)
+                        await Shell.Current.GoToAsync("admin");
                     else
-                        Shell.Current.GoToAsync("customer");
+                        await Shell.Current.GoToAsync("customer");
                 }
                 else
                 {
-                    ErrorMessage = "Invalid credentials";
+                    ErrorMessage = apiResponse.ErrorMessage ?? "Invalid credentials. Please try again.";
+                    
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                    {
+                        var toastService = ServiceHelper.GetService<IToastService>();
+                        await toastService.ShowError(ErrorMessage);
+                    });
                 }
             }
             catch (Exception ex)
             {
                 ErrorMessage = $"Login failed: {ex.Message}";
+                
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    var toastService = ServiceHelper.GetService<IToastService>();
+                    await toastService.ShowError(ErrorMessage);
+                });
             }
             finally
             {

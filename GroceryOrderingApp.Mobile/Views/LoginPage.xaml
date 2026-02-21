@@ -3,23 +3,107 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="GroceryOrderingApp.Mobile.Views.LoginPage"
              Title="Login"
-             BackgroundColor="White">
-    <VerticalStackLayout Padding="20" Spacing="10" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
-        <Label Text="Grocery Ordering App" FontSize="28" FontAttributes="Bold" HorizontalTextAlignment="Center" Margin="0,30,0,20"/>
+             BackgroundColor="{StaticResource BackgroundColor}">
+    
+    <Grid RowDefinitions="Auto,*,Auto" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
         
-        <Label Text="UserId:" FontSize="14" FontAttributes="Bold"/>
-        <Entry x:Name="UserIdEntry" Placeholder="Enter your UserId" Text="{Binding UserId}"/>
+        <!-- Header -->
+        <VerticalStackLayout Grid.Row="0" Padding="0" BackgroundColor="{StaticResource Primary}" VerticalOptions="Start">
+            <Label Text="🛒" FontSize="48" HorizontalTextAlignment="Center" Margin="0,30,0,0"/>
+            <Label Text="Grocery Ordering" Style="{StaticResource HeadlineStyle}" 
+                   HorizontalTextAlignment="Center" TextColor="White" Margin="0,10,0,0"/>
+            <Label Text="Welcome Back" FontSize="14" TextColor="{StaticResource TextSecondary}" 
+                   HorizontalTextAlignment="Center" Margin="0,5,0,30"/>
+        </VerticalStackLayout>
         
-        <Label Text="Password:" FontSize="14" FontAttributes="Bold"/>
-        <Entry x:Name="PasswordEntry" Placeholder="Enter your password" IsPassword="True" Text="{Binding Password}"/>
+        <!-- Main Content -->
+        <ScrollView Grid.Row="1" Padding="20" VerticalOptions="CenterAndExpand">
+            <VerticalStackLayout Spacing="16">
+                
+                <!-- UserId Field -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="UserId" FontAttributes="Bold" FontSize="14" TextColor="{StaticResource TextPrimary}"/>
+                    <Frame Style="{StaticResource CardStyle}" Padding="0" HasShadow="False" BorderColor="{StaticResource Primary}">
+                        <Entry x:Name="UserIdEntry" 
+                               Placeholder="Enter admin / customer UserId" 
+                               Text="{Binding UserId}"
+                               FontSize="14"
+                               PlaceholderColor="{StaticResource TextHint}"
+                               TextColor="{StaticResource TextPrimary}"
+                               Padding="12"/>
+                    </Frame>
+                </VerticalStackLayout>
+                
+                <!-- Password Field with Show/Hide -->
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Password" FontAttributes="Bold" FontSize="14" TextColor="{StaticResource TextPrimary}"/>
+                    <Frame x:Name="PasswordFrame" Style="{StaticResource CardStyle}" Padding="12" 
+                           HasShadow="False" BorderColor="{StaticResource Primary}">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Entry x:Name="PasswordEntry" 
+                                   Grid.Column="0"
+                                   Placeholder="Enter your password" 
+                                   IsPassword="{Binding IsPasswordHidden, Source={x:Reference PasswordToggle}}"
+                                   Text="{Binding Password}"
+                                   FontSize="14"
+                                   PlaceholderColor="{StaticResource TextHint}"
+                                   TextColor="{StaticResource TextPrimary}"
+                                   VerticalOptions="Center"/>
+                            <Button x:Name="PasswordToggle"
+                                    Grid.Column="1"
+                                    Text="👁"
+                                    FontSize="20"
+                                    Background="Transparent"
+                                    Padding="0"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    VerticalOptions="Center"
+                                    HorizontalOptions="End"/>
+                        </Grid>
+                    </Frame>
+                </VerticalStackLayout>
+                
+                <!-- Error Message -->
+                <Label Text="{Binding ErrorMessage}" 
+                       TextColor="{StaticResource Error}" 
+                       FontSize="12" 
+                       LineBreakMode="WordWrap"
+                       IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBool}}"/>
+                
+                <!-- Loading Indicator -->
+                <ActivityIndicator IsRunning="{Binding IsLoading}" 
+                                   IsVisible="{Binding IsLoading}"
+                                   Color="{StaticResource Primary}"
+                                   Scale="1.5"/>
+                
+                <!-- Login Button -->
+                <Button Text="Sign In" 
+                        Command="{Binding LoginCommand}"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Margin="0,10,0,0"
+                        FontSize="16"
+                        Padding="12"/>
+                
+                <!-- Demo Info Card -->
+                <Frame BorderColor="{StaticResource Secondary}" HasShadow="False" Padding="12" CornerRadius="8" Margin="0,20,0,0">
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="📱 Demo Credentials" FontAttributes="Bold" FontSize="13" TextColor="{StaticResource Secondary}"/>
+                        <Label Text="UserId: admin" FontSize="12" TextColor="{StaticResource TextPrimary}"/>
+                        <Label Text="Password: Admin@123" FontSize="12" TextColor="{StaticResource TextPrimary}"/>
+                        <Label Text="or log in with any customer account" FontSize="11" TextColor="{StaticResource TextSecondary}" Margin="0,4,0,0"/>
+                    </VerticalStackLayout>
+                </Frame>
+                
+            </VerticalStackLayout>
+        </ScrollView>
         
-        <Label Text="{Binding ErrorMessage}" TextColor="Red" FontSize="12" IsVisible="{Binding ErrorMessage, Converter={StaticResource StringToBool}}"/>
-        
-        <Button Text="Login" Command="{Binding LoginCommand}" Margin="0,20,0,0" Padding="10"/>
-        
-        <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"/>
-        
-        <Label Text="Demo Credentials:" FontSize="12" FontAttributes="Bold" Margin="0,20,0,0"/>
-        <Label Text="Admin: admin / Admin@123" FontSize="11"/>
-    </VerticalStackLayout>
+        <!-- Footer -->
+        <Label Grid.Row="2" 
+               Text="Secure Login • Free Tier" 
+               FontSize="11" 
+               TextColor="{StaticResource TextHint}"
+               HorizontalTextAlignment="Center" 
+               Margin="0,0,0,12"/>
+    </Grid>
+    
 </ContentPage>
