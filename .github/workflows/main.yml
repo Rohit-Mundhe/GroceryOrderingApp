@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build MAUI Android APK
 
 on:
   push:
@@ -11,40 +11,46 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # Checkout repo
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    # 1. Checkout repo
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      # Setup .NET 8
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '8.0.x'
+    # 2. Setup .NET 8
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
 
-      # Restore NuGet packages
-      - name: Restore NuGet packages
-        run: dotnet restore GroceryOrderingApp.sln
+    # 3. Install MAUI workloads
+    - name: Install .NET MAUI workloads
+      run: |
+        dotnet workload install maui
+        dotnet workload restore
 
-      # Install Android SDK
-      - name: Install Android SDK
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 33
-          target: google_apis
-          arch: x86_64
-          force-avd-creation: true
+    # 4. Restore NuGet packages
+    - name: Restore NuGet packages
+      run: dotnet restore GroceryOrderingApp.sln
 
-      # Publish APK
-      - name: Publish APK
-        run: |
-          dotnet publish GroceryOrderingApp.Mobile/GroceryOrderingApp.Mobile.csproj \
-            -f:net8.0-android \
-            -c Release \
-            -o ./GroceryOrderingApp.Mobile/output
+    # 5. Install Android SDK (needed for MAUI Android build)
+    - name: Install Android SDK
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 33
+        target: google_apis
+        arch: x86_64
+        force-avd-creation: true
 
-      # Upload APK artifact (updated to v4)
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: GroceryOrderingApp-APK
-          path: ./GroceryOrderingApp.Mobile/output/*.apk
+    # 6. Build and publish APK
+    - name: Publish APK
+      run: |
+        dotnet publish GroceryOrderingApp.Mobile/GroceryOrderingApp.Mobile.csproj \
+          -f:net8.0-android \
+          -c Release \
+          -o ./GroceryOrderingApp.Mobile/output
+
+    # 7. Upload APK artifact
+    - name: Upload APK artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: GroceryOrderingApp-APK
+        path: ./GroceryOrderingApp.Mobile/output/*.apk
