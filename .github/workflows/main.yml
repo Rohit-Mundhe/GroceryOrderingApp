@@ -3,48 +3,48 @@ name: Build Android APK
 on:
   push:
     branches:
-      - main   # change if your default branch is different
-  workflow_dispatch: # allows manual trigger
+      - main
+  workflow_dispatch:
 
 jobs:
   build-android:
     runs-on: windows-latest
 
     steps:
-    # Step 1: Checkout the repository
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    # Step 2: Setup .NET 8
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: '8.0.x'
+      # Setup .NET 8
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
 
-    # Step 3: Restore NuGet packages for the solution
-    - name: Restore NuGet packages
-      run: dotnet restore GroceryOrderingApp.sln
+      # Restore NuGet packages
+      - name: Restore NuGet packages
+        run: dotnet restore GroceryOrderingApp.sln
 
-    # Step 4: Install Android SDK (needed for MAUI Android build)
-    - name: Install Android SDK
-      uses: reactivecircus/android-emulator-runner@v2
-      with:
-        api-level: 33
-        target: google_apis
-        arch: x86_64
-        force-avd-creation: true
+      # Install Android SDK
+      - name: Install Android SDK
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: google_apis
+          arch: x86_64
+          force-avd-creation: true
 
-    # Step 5: Build and publish the APK
-    - name: Publish APK
-      run: |
-        dotnet publish GroceryOrderingApp.Mobile/GroceryOrderingApp.Mobile.csproj \
-          -f:net8.0-android \
-          -c Release \
-          -o ./GroceryOrderingApp.Mobile/output
+      # Publish APK
+      - name: Publish APK
+        run: |
+          dotnet publish GroceryOrderingApp.Mobile/GroceryOrderingApp.Mobile.csproj \
+            -f:net8.0-android \
+            -c Release \
+            -o ./GroceryOrderingApp.Mobile/output
 
-    # Step 6: Upload APK as artifact
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: GroceryOrderingApp-APK
-        path: ./GroceryOrderingApp.Mobile/output/*.apk
+      # Upload APK artifact (updated to v4)
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GroceryOrderingApp-APK
+          path: ./GroceryOrderingApp.Mobile/output/*.apk
